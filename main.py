@@ -1,6 +1,7 @@
 import sqlite3
 import tkinter as tk
 from tkinter import ttk
+from tkinter import messagebox
 
 def init_db():
     conn = sqlite3.connect('busines_orders.db')
@@ -38,6 +39,18 @@ def view_orders():
     conn.close()
 
 
+def comlete_order():
+    selected_item = tree.selection()
+    if selected_item:
+        order_id = tree.item(selected_item[0])['values'][0]
+        conn = sqlite3.connect('busines_orders.db')
+        cur = conn.cursor()
+        cur.execute("UPDATE orders SET status = 'Выполнен' WHERE id = ?", (order_id,))
+        conn.commit()
+        conn.close()
+        view_orders()
+    else:
+        messagebox.showwarning("Предупреждение", "Выберите заказ для выполнения")
 
 
 app = tk.Tk()
@@ -55,6 +68,9 @@ order_details_entry.pack()
 
 add_button = tk.Button(app, text="Добавить заказ", command=add_order)
 add_button.pack()
+
+complete_button = tk.Button(app, text="Выполнить заказ", command=comlete_order)
+complete_button.pack()
 
 columns = ("ID", "customer_name", "order_details", "status")
 tree = ttk.Treeview(app, columns=columns, show="headings")
